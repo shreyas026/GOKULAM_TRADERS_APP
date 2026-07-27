@@ -15,7 +15,12 @@ from khata.models import CustomerCredit
 print("Seeding database...")
 
 # Create users
-admin = User.objects.get(username='admin')
+admin, created = User.objects.get_or_create(
+    username='admin', defaults={'email': 'admin@gokulam.com', 'phone': '9876543200', 'role': 'admin', 'first_name': 'Admin', 'last_name': 'User', 'is_staff': True, 'is_superuser': True, 'address': 'Gokulam Store, Bangalore'}
+)
+if created:
+    admin.set_password('admin123')
+    admin.save()
 
 customer1, _ = User.objects.get_or_create(
     username='ravi_kumar', defaults={'email': 'ravi@gmail.com', 'phone': '9876543210', 'role': 'customer', 'first_name': 'Ravi', 'last_name': 'Kumar', 'address': '123 Main Street, Bangalore'}
