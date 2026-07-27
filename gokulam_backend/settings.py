@@ -1,4 +1,5 @@
 import os
+import dj_database_url
 from pathlib import Path
 from datetime import timedelta
 
@@ -56,16 +57,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'gokulam_backend.wsgi.application'
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('PGDATABASE', 'gokulam'),
-        'USER': os.environ.get('PGUSER', 'postgres'),
-        'PASSWORD': os.environ.get('PGPASSWORD', ''),
-        'HOST': os.environ.get('PGHOST', 'localhost'),
-        'PORT': os.environ.get('PGPORT', '5432'),
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(default=os.environ.get('DATABASE_URL'))
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('PGDATABASE', 'gokulam'),
+            'USER': os.environ.get('PGUSER', 'postgres'),
+            'PASSWORD': os.environ.get('PGPASSWORD', ''),
+            'HOST': os.environ.get('PGHOST', 'localhost'),
+            'PORT': os.environ.get('PGPORT', '5432'),
+        }
+    }
 
 AUTH_USER_MODEL = 'accounts.User'
 
@@ -97,7 +104,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'whitenoise.storage.StaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
