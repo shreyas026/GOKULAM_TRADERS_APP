@@ -1,6 +1,6 @@
 class AppConfig {
   static const String appName = 'Gokulam Traders';
-  static const String apiBaseUrl = 'http://10.29.82.227:8000/api';
+  static const String apiBaseUrl = 'https://web-production-1b48f1.up.railway.app/api';
   static const int deliveryRadiusKm = 5;
   static const double deliveryCharge = 20.0;
 }
