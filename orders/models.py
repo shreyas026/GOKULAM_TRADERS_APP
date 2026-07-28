@@ -33,6 +33,16 @@ class Order(models.Model):
         DELIVERED = 'delivered', 'Delivered'
         CANCELLED = 'cancelled', 'Cancelled'
 
+    TAKEAWAY_FLOW = ['pending', 'confirmed', 'packed', 'delivered']
+    HOME_DELIVERY_FLOW = ['pending', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered']
+
+    ROLE_CAN_UPDATE = {
+        'admin': ['pending', 'confirmed', 'packed', 'shipped', 'out_for_delivery', 'delivered', 'cancelled'],
+        'cashier': ['confirmed', 'packed', 'cancelled'],
+        'delivery': ['out_for_delivery', 'delivered'],
+        'customer': ['cancelled'],
+    }
+
     class DeliveryType(models.TextChoices):
         TAKEAWAY = 'takeaway', 'Takeaway'
         HOME_DELIVERY = 'home_delivery', 'Home Delivery'

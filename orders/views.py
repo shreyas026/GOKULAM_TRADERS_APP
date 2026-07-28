@@ -193,17 +193,33 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
     @action(detail=True, methods=['post'])
     def update_status(self, request, pk=None):
         order = self.get_object()
-        serializer = OrderStatusUpdateSerializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(serializer.errors, status=400)
-        old_status = order.status
-        order.status = serializer.data['status']
+        user = request.user
+        new_status = request.data.get('status', '')
+        note = request.data.get('note', '')
+
+        allowed = Order.ROLE_CAN_UPDATE.get(user.role, [])
+        if new_status not in allowed:
+            return Response({'error': f'Your role ({user.role}) cannot change status to {new_status}'}, status=403)
+
+        flow = Order.TAKEAWAY_FLOW if order.delivery_type == 'takeaway' else Order.HOME_DELIVERY_FLOW
+        if order.status not in flow and new_status != 'cancelled':
+            return Response({'error': f'Cannot update status from {order.status} for {order.delivery_type} orders'}, status=400)
+
+        if new_status != 'cancelled':
+            current_idx = flow.index(order.status) if order.status in flow else -1
+            next_idx = flow.index(new_status) if new_status in flow else -1
+            if next_idx != current_idx + 1:
+                return Response({'error': f'Invalid status transition: {order.status} -> {new_status}. Expected: {flow[current_idx + 1] if current_idx + 1 < len(flow) else "delivered"}'}, status=400)
+
+        order.status = new_status
+        if new_status == 'delivered':
+            order.payment_status = 'completed'
         order.save()
         OrderStatusLog.objects.create(
             order=order,
-            status=serializer.data['status'],
-            note=serializer.data.get('note', ''),
-            created_by=request.user
+            status=new_status,
+            note=note,
+            created_by=user
         )
         return Response(OrderDetailSerializer(order).data)
 
