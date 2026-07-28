@@ -39,6 +39,16 @@ class ProductDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductCreateUpdateSerializer(serializers.ModelSerializer):
+    category_name = serializers.CharField(source='category.name', read_only=True)
+    brand_name = serializers.CharField(source='brand.name', read_only=True, default='')
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+        read_only_fields = ['rating', 'total_sold', 'created_at', 'updated_at']
+
+
 class ReviewSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)
 

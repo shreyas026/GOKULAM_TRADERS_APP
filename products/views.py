@@ -7,7 +7,7 @@ from django.utils import timezone
 from .models import Category, Brand, Product, Review, Banner, Coupon
 from .serializers import (
     CategorySerializer, BrandSerializer, ProductListSerializer,
-    ProductDetailSerializer, ReviewSerializer, BannerSerializer, CouponSerializer
+    ProductDetailSerializer, ProductCreateUpdateSerializer, ReviewSerializer, BannerSerializer, CouponSerializer
 )
 
 
@@ -41,6 +41,8 @@ class ProductViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return ProductDetailSerializer
+        if self.action in ['create', 'update', 'partial_update']:
+            return ProductCreateUpdateSerializer
         return ProductListSerializer
 
     def get_queryset(self):

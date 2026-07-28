@@ -58,14 +58,26 @@ Address.objects.get_or_create(user=customer3, label='Home', defaults={'full_addr
 print("Addresses created.")
 
 # Create categories
-categories_data = [
-    'Hardware', 'Electrical', 'Plumbing', 'Tools', 'Paints',
-    'Safety Equipment', 'Fasteners', 'Pipes', 'Lighting',
-    'Switches & Sockets', 'Chemicals', 'Bathroom Fittings'
-]
+categories_data = {
+    'Hardware': 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=200',
+    'Electrical': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
+    'Plumbing': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200',
+    'Tools': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200',
+    'Paints': 'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=200',
+    'Safety Equipment': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200',
+    'Fasteners': 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=200',
+    'Pipes': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200',
+    'Lighting': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
+    'Switches & Sockets': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
+    'Chemicals': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=200',
+    'Bathroom Fittings': 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=200',
+}
 categories = {}
-for name in categories_data:
-    cat, _ = Category.objects.get_or_create(name=name)
+for name, image_url in categories_data.items():
+    cat, created = Category.objects.get_or_create(name=name)
+    if created or not cat.image:
+        cat.image = image_url
+        cat.save()
     categories[name] = cat
 
 print("Categories created.")
