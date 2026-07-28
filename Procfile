@@ -1,2 +1,2 @@
-release: python manage.py migrate --noinput && python seed_data.py
-web: gunicorn gokulam_backend.wsgi --bind 0.0.0.0:$PORT
+release: python manage.py migrate --noinput --run-syncdb
+web: python manage.py migrate --noinput && python seed_data.py && gunicorn gokulam_backend.wsgi --bind 0.0.0.0:$PORT
