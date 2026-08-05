@@ -76,15 +76,10 @@ class OrderDetailSerializer(serializers.ModelSerializer):
 class CreateOrderSerializer(serializers.Serializer):
     delivery_type = serializers.ChoiceField(choices=Order.DeliveryType.choices)
     address_id = serializers.IntegerField(required=False, allow_null=True)
+    delivery_address_text = serializers.CharField(required=False, allow_blank=True)
     payment_method = serializers.ChoiceField(choices=Order.PaymentMethod.choices)
     notes = serializers.CharField(required=False, allow_blank=True)
     coupon_code = serializers.CharField(required=False, allow_blank=True)
-
-    def validate(self, data):
-        if data.get('delivery_type') == Order.DeliveryType.HOME_DELIVERY:
-            if not data.get('address_id'):
-                raise serializers.ValidationError({'address_id': 'Delivery address is required for home delivery'})
-        return data
 
 
 class OrderStatusUpdateSerializer(serializers.Serializer):

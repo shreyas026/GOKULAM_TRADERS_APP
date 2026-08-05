@@ -10,10 +10,16 @@ class CreditTransactionSerializer(serializers.ModelSerializer):
 
 class CustomerCreditSerializer(serializers.ModelSerializer):
     customer_detail = UserSerializer(source='customer', read_only=True)
+    transactions = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomerCredit
         fields = '__all__'
+        read_only_fields = ['transactions']
+
+    def get_transactions(self, obj):
+        txns = obj.transactions.all().order_by('-created_at')[:30]
+        return CreditTransactionSerializer(txns, many=True).data
 
     def to_representation(self, instance):
         data = super().to_representation(instance)

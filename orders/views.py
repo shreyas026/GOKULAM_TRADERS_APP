@@ -133,9 +133,11 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             if serializer.data['delivery_type'] == Order.DeliveryType.HOME_DELIVERY:
                 from accounts.models import Address
                 address = Address.objects.filter(id=serializer.data.get('address_id'), user=request.user).first()
-                if not address:
+                if request.user.role == 'customer' and not address:
                     return Response({'error': 'Delivery address required'}, status=400)
-                if address.latitude and address.longitude:
+                if not address:
+                    address = None
+                if address and address.latitude and address.longitude:
                     STORE_LAT, STORE_LON = 12.9716, 77.5946
                     from math import radians, sin, cos, sqrt, atan2
                     dlat = radians(address.latitude - STORE_LAT)
