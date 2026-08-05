@@ -16,21 +16,27 @@ from accounts.models import User
 class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = CustomerCredit.objects.all()
     serializer_class = CustomerCreditSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
 
-    @action(detail=False, methods=['get'])
+    def get_queryset(self):
+        user = self.request.user
+        if user.role in ['admin', 'cashier']:
+            return CustomerCredit.objects.all()
+        return CustomerCredit.objects.filter(customer=user)
+
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
     def customers(self, request):
         credits = self.get_queryset().filter(party_type='customer')
         serializer = self.get_serializer(credits, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
     def suppliers(self, request):
         credits = self.get_queryset().filter(party_type='supplier')
         serializer = self.get_serializer(credits, many=True)
         return Response(serializer.data)
 
-    @action(detail=False, methods=['post'])
+    @action(detail=False, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def add_supplier(self, request):
         data = request.data.copy()
         data['party_type'] = 'supplier'
@@ -40,7 +46,7 @@ class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
             return Response(CustomerCreditSerializer(credit).data, status=201)
         return Response(serializer.errors, status=400)
 
-    @action(detail=True, methods=['post'])
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
     def add_payment(self, request, pk=None):
         credit = self.get_object()
         serializer = PaymentEntrySerializer(data=request.data)
@@ -61,7 +67,7 @@ class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
             )
         return Response(CustomerCreditSerializer(credit).data)
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAdminUser])
     def outstanding(self, request):
         credits = self.get_queryset().filter(outstanding__gt=0).order_by('-outstanding')
         serializer = self.get_serializer(credits, many=True)
@@ -71,6 +77,12 @@ class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
     def my_credit(self, request):
         credit, _ = CustomerCredit.objects.get_or_create(customer=request.user)
         return Response(CustomerCreditSerializer(credit).data)
+
+    @action(detail=True, methods=['get'])
+    def transactions(self, request, pk=None):
+        credit = self.get_object()
+        txns = CreditTransaction.objects.filter(credit=credit).order_by('-created_at')
+        return Response(CreditTransactionSerializer(txns, many=True).data)
 
 
 class PaymentViewSet(viewsets.ModelViewSet):

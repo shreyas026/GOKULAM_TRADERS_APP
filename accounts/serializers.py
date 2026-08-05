@@ -4,6 +4,7 @@ from .models import User, Address
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=6)
+    role = serializers.ChoiceField(choices=['customer', 'cashier', 'delivery'], default='customer')
 
     class Meta:
         model = User

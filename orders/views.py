@@ -1,6 +1,6 @@
 import random
 import string
-from rest_framework import viewsets, permissions, generics, status
+from rest_framework import serializers, viewsets, permissions, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -179,7 +179,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             if serializer.data['payment_method'] == Order.PaymentMethod.CREDIT:
                 credit, _ = CustomerCredit.objects.get_or_create(customer=request.user)
                 if credit.outstanding + total > credit.credit_limit:
-                    return Response({'error': 'Credit limit exceeded'}, status=400)
+                    raise serializers.ValidationError({'error': 'Credit limit exceeded'})
                 credit.outstanding += total
                 credit.total_credit_given += total
                 credit.save()
@@ -225,13 +225,23 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=True, methods=['post'])
     def assign_delivery(self, request, pk=None):
+        user = request.user
+        if user.role not in ['admin', 'cashier']:
+            return Response({'error': 'Only admin or cashier can assign delivery'}, status=403)
         order = self.get_object()
+        if order.delivery_type != Order.DeliveryType.HOME_DELIVERY:
+            return Response({'error': 'Only home delivery orders can be assigned'}, status=400)
         staff_id = request.data.get('staff_id')
         from accounts.models import User
         try:
             staff = User.objects.get(id=staff_id, role='delivery')
             order.assigned_to = staff
+            order.status = 'out_for_delivery'
             order.save()
+            OrderStatusLog.objects.create(
+                order=order, status='out_for_delivery',
+                note=f'Assigned to {staff.username}', created_by=user
+            )
             return Response({'message': f'Assigned to {staff.username}'})
         except User.DoesNotExist:
             return Response({'error': 'Staff not found'}, status=404)
