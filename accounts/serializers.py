@@ -14,10 +14,10 @@ class RegisterSerializer(serializers.ModelSerializer):
         is_staff_role = role in [User.Role.CASHIER, User.Role.DELIVERY]
         user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data.get('email', ''),
-            phone=validated_data.get('phone', ''),
+            email=validated_data.get('email') or '',
+            phone=validated_data.get('phone') or None,
             password=validated_data['password'],
-            address=validated_data.get('address', ''),
+            address=validated_data.get('address') or '',
             role=role,
             is_approved=not is_staff_role,
             is_active=not is_staff_role,
