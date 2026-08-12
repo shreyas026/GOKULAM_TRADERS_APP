@@ -146,9 +146,10 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
                     dist_km = 6371 * 2 * atan2(sqrt(a), sqrt(1-a))
                     if dist_km > 5:
                         return Response({'error': f'Delivery address is {dist_km:.1f} km away. Maximum 5 km allowed.'}, status=400)
-                    delivery_charge = max(10, ceil(dist_km) * 10)
+                    from math import ceil
+                    delivery_charge = max(5, ceil(dist_km / 0.5) * 5)
                 else:
-                    delivery_charge = 10
+                    delivery_charge = 5
             total = subtotal + total_gst + delivery_charge - discount
             order = Order.objects.create(
                 order_id=generate_order_id(),
