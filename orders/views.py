@@ -139,14 +139,16 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
                     address = None
                 if address and address.latitude and address.longitude:
                     STORE_LAT, STORE_LON = 12.9716, 77.5946
-                    from math import radians, sin, cos, sqrt, atan2
+                    from math import radians, sin, cos, sqrt, atan2, ceil
                     dlat = radians(address.latitude - STORE_LAT)
                     dlon = radians(address.longitude - STORE_LON)
                     a = sin(dlat/2)**2 + cos(radians(STORE_LAT)) * cos(radians(address.latitude)) * sin(dlon/2)**2
                     dist_km = 6371 * 2 * atan2(sqrt(a), sqrt(1-a))
                     if dist_km > 5:
                         return Response({'error': f'Delivery address is {dist_km:.1f} km away. Maximum 5 km allowed.'}, status=400)
-                delivery_charge = 20
+                    delivery_charge = max(10, ceil(dist_km) * 10)
+                else:
+                    delivery_charge = 10
             total = subtotal + total_gst + delivery_charge - discount
             order = Order.objects.create(
                 order_id=generate_order_id(),
@@ -253,6 +255,34 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
         orders = self.get_queryset().filter(status='pending')
         serializer = OrderListSerializer(orders, many=True)
         return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def update_location(self, request, pk=None):
+        user = request.user
+        order = self.get_object()
+        if order.assigned_to_id != user.id:
+            return Response({'error': 'Only the assigned delivery agent can update location'}, status=403)
+        lat = request.data.get('lat')
+        lng = request.data.get('lng')
+        try:
+            order.current_lat = float(lat)
+            order.current_lng = float(lng)
+            order.save(update_fields=['current_lat', 'current_lng', 'updated_at'])
+            return Response({'message': 'Location updated'})
+        except (TypeError, ValueError):
+            return Response({'error': 'Invalid coordinates'}, status=400)
+
+    @action(detail=True, methods=['get'])
+    def tracking(self, request, pk=None):
+        order = self.get_object()
+        return Response({
+            'order_id': order.order_id,
+            'status': order.status,
+            'delivery_type': order.delivery_type,
+            'lat': order.current_lat,
+            'lng': order.current_lng,
+            'assigned_to': order.assigned_to.username if order.assigned_to else None,
+        })
 
 
 class WishlistViewSet(viewsets.ModelViewSet):

@@ -60,6 +60,7 @@ class OrderListSerializer(serializers.ModelSerializer):
 class OrderDetailSerializer(serializers.ModelSerializer):
     items = OrderItemSerializer(many=True, read_only=True)
     delivery_address_detail = serializers.SerializerMethodField()
+    assigned_to_detail = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
@@ -70,6 +71,15 @@ class OrderDetailSerializer(serializers.ModelSerializer):
         if obj.delivery_address:
             from accounts.serializers import AddressSerializer
             return AddressSerializer(obj.delivery_address).data
+        return None
+
+    def get_assigned_to_detail(self, obj):
+        if obj.assigned_to:
+            return {
+                'id': obj.assigned_to.id,
+                'username': obj.assigned_to.username,
+                'phone': obj.assigned_to.phone,
+            }
         return None
 
 
