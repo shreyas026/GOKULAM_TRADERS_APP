@@ -138,16 +138,19 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
                 if not address:
                     address = None
                 if address and address.latitude and address.longitude:
-                    STORE_LAT, STORE_LON = 12.9716, 77.5946
+                    from products.models import StoreConfig
+                    store = StoreConfig.get()
+                    STORE_LAT, STORE_LON = store.latitude, store.longitude
                     from math import radians, sin, cos, sqrt, atan2, ceil
                     dlat = radians(address.latitude - STORE_LAT)
                     dlon = radians(address.longitude - STORE_LON)
                     a = sin(dlat/2)**2 + cos(radians(STORE_LAT)) * cos(radians(address.latitude)) * sin(dlon/2)**2
                     dist_km = 6371 * 2 * atan2(sqrt(a), sqrt(1-a))
-                    if dist_km > 5:
-                        return Response({'error': f'Delivery address is {dist_km:.1f} km away. Maximum 5 km allowed.'}, status=400)
+                    if dist_km > store.delivery_radius_km:
+                        return Response({'error': f'Delivery address is {dist_km:.1f} km away. Maximum {store.delivery_radius_km} km allowed.'}, status=400)
                     from math import ceil
-                    delivery_charge = max(5, ceil(dist_km / 0.5) * 5)
+                    half_km_charge = float(store.delivery_charge_per_half_km)
+                    delivery_charge = max(half_km_charge, ceil(dist_km / 0.5) * half_km_charge)
                 else:
                     delivery_charge = 5
             total = subtotal + total_gst + delivery_charge - discount

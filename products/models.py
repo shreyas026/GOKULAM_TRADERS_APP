@@ -101,3 +101,24 @@ class Coupon(models.Model):
 
     def __str__(self):
         return self.code
+
+
+class StoreConfig(models.Model):
+    name = models.CharField(max_length=200, default='Gokulam Traders')
+    address = models.CharField(max_length=500, default='123 Main Road, Bangalore - 560001')
+    latitude = models.FloatField(default=12.9716)
+    longitude = models.FloatField(default=77.5946)
+    delivery_radius_km = models.FloatField(default=5)
+    delivery_charge_per_half_km = models.DecimalField(max_digits=6, decimal_places=2, default=5)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = 'Store Configuration'
+
+    def __str__(self):
+        return self.name
+
+    @classmethod
+    def get(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj

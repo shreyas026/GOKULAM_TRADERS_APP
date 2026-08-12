@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.db.models import Q, Count, F
 from django.utils import timezone
-from .models import Category, Brand, Product, Review, Banner, Coupon
+from .models import Category, Brand, Product, Review, Banner, Coupon, StoreConfig
 from .serializers import (
     CategorySerializer, BrandSerializer, ProductListSerializer,
     ProductDetailSerializer, ProductCreateUpdateSerializer, ReviewSerializer, BannerSerializer, CouponSerializer
@@ -144,12 +144,34 @@ class DashboardStatsView(APIView):
 
 class StoreLocationView(APIView):
     def get(self, request):
+        config = StoreConfig.get()
         return Response({
-            'name': 'Gokulam Traders',
-            'address': '123 Main Road, Bangalore - 560001',
-            'latitude': 12.9716,
-            'longitude': 77.5946,
-            'delivery_radius_km': 5,
+            'name': config.name,
+            'address': config.address,
+            'latitude': config.latitude,
+            'longitude': config.longitude,
+            'delivery_radius_km': config.delivery_radius_km,
+            'delivery_charge_per_half_km': float(config.delivery_charge_per_half_km),
+        })
+
+    def put(self, request):
+        if not request.user.is_staff:
+            return Response({'detail': 'Admin only'}, status=403)
+        config = StoreConfig.get()
+        if 'name' in request.data: config.name = request.data['name']
+        if 'address' in request.data: config.address = request.data['address']
+        if 'latitude' in request.data: config.latitude = float(request.data['latitude'])
+        if 'longitude' in request.data: config.longitude = float(request.data['longitude'])
+        if 'delivery_radius_km' in request.data: config.delivery_radius_km = float(request.data['delivery_radius_km'])
+        if 'delivery_charge_per_half_km' in request.data: config.delivery_charge_per_half_km = request.data['delivery_charge_per_half_km']
+        config.save()
+        return Response({
+            'name': config.name,
+            'address': config.address,
+            'latitude': config.latitude,
+            'longitude': config.longitude,
+            'delivery_radius_km': config.delivery_radius_km,
+            'delivery_charge_per_half_km': float(config.delivery_charge_per_half_km),
         })
 
 
