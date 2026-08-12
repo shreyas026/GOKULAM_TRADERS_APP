@@ -52,7 +52,8 @@ class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = PaymentEntrySerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=400)
-        amount = serializer.data['amount']
+        amount = serializer.validated_data['amount']
+        note = serializer.validated_data.get('note', '')
         with transaction.atomic():
             credit.outstanding -= amount
             credit.total_repaid += amount
@@ -62,7 +63,7 @@ class CustomerCreditViewSet(viewsets.ReadOnlyModelViewSet):
                 transaction_type='repayment',
                 amount=amount,
                 balance_after=credit.outstanding,
-                note=serializer.data.get('note', ''),
+                note=note,
                 created_by=request.user
             )
         return Response(CustomerCreditSerializer(credit).data)

@@ -151,3 +151,30 @@ class StoreLocationView(APIView):
             'longitude': 77.5946,
             'delivery_radius_km': 5,
         })
+
+
+class ProductImageUploadView(APIView):
+    permission_classes = [permissions.IsAdminUser]
+
+    def post(self, request):
+        image = request.FILES.get('image')
+        if not image:
+            return Response({'error': 'image file required'}, status=400)
+        if image.size > 5 * 1024 * 1024:
+            return Response({'error': 'Image must be under 5 MB'}, status=400)
+        import os
+        from django.conf import settings
+        from django.utils.crypto import get_random_string
+        ext = os.path.splitext(image.name)[1].lower()
+        if ext not in ['.jpg', '.jpeg', '.png', '.webp', '.gif']:
+            ext = '.jpg'
+        filename = f'product_{get_random_string(10)}{ext}'
+        subdir = os.path.join(settings.MEDIA_ROOT, 'product_images')
+        os.makedirs(subdir, exist_ok=True)
+        path = os.path.join(subdir, filename)
+        with open(path, 'wb') as f:
+            for chunk in image.chunks():
+                f.write(chunk)
+        url = settings.MEDIA_URL + 'product_images/' + filename
+        absolute = request.build_absolute_uri(url)
+        return Response({'url': absolute}, status=201)

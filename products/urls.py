@@ -14,4 +14,5 @@ urlpatterns = [
     path('coupon/validate/', views.CouponValidateView.as_view(), name='coupon-validate'),
     path('dashboard/stats/', views.DashboardStatsView.as_view(), name='dashboard-stats'),
     path('store/location/', views.StoreLocationView.as_view(), name='store-location'),
+    path('products/upload_image/', views.ProductImageUploadView.as_view(), name='product-upload-image'),
 ]
