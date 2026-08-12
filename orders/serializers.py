@@ -43,11 +43,15 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class OrderListSerializer(serializers.ModelSerializer):
     item_count = serializers.SerializerMethodField()
     first_item_image = serializers.SerializerMethodField()
+    delivery_lat = serializers.SerializerMethodField()
+    delivery_lng = serializers.SerializerMethodField()
+    delivery_address_text = serializers.SerializerMethodField()
 
     class Meta:
         model = Order
         fields = ['id', 'order_id', 'status', 'total_amount', 'payment_status',
-                  'delivery_type', 'item_count', 'first_item_image', 'created_at']
+                  'delivery_type', 'item_count', 'first_item_image', 'created_at',
+                  'delivery_lat', 'delivery_lng', 'delivery_address_text']
 
     def get_item_count(self, obj):
         return obj.items.count()
@@ -55,6 +59,20 @@ class OrderListSerializer(serializers.ModelSerializer):
     def get_first_item_image(self, obj):
         item = obj.items.first()
         return item.product_image if item else ''
+
+    def get_delivery_lat(self, obj):
+        addr = obj.delivery_address
+        return float(addr.latitude) if addr and addr.latitude else None
+
+    def get_delivery_lng(self, obj):
+        addr = obj.delivery_address
+        return float(addr.longitude) if addr and addr.longitude else None
+
+    def get_delivery_address_text(self, obj):
+        addr = obj.delivery_address
+        if addr:
+            return f"{addr.full_address}, {addr.city}"
+        return obj.notes
 
 
 class OrderDetailSerializer(serializers.ModelSerializer):
