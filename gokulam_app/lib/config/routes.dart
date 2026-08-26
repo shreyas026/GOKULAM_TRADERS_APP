@@ -29,6 +29,7 @@ import '../screens/khata/khata_screen.dart';
 import '../screens/khata/credit_detail_screen.dart';
 import '../screens/customer/addresses_screen.dart';
 import '../screens/customer/category_products_screen.dart';
+import '../screens/customer/customer_tracking_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -68,6 +69,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/checkout', builder: (_, __) => const CheckoutScreen()),
           GoRoute(path: '/orders', builder: (_, __) => const OrdersScreen()),
           GoRoute(path: '/orders/:id', builder: (_, s) => OrderDetailScreen(orderId: int.parse(s.pathParameters['id']!))),
+          GoRoute(path: '/orders/:id/track', builder: (_, s) => CustomerTrackingScreen(orderId: int.parse(s.pathParameters['id']!))),
           GoRoute(path: '/wishlist', builder: (_, __) => const WishlistScreen()),
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
           GoRoute(path: '/admin', builder: (_, __) => const AdminDashboard()),

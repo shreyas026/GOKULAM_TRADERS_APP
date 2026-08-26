@@ -4,8 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
+import 'package:latlong2/latlong.dart';
 import '../../providers/orders_provider.dart';
 import '../../config/theme.dart';
+import '../../config/app_config.dart';
+import '../../widgets/delivery_map_view.dart';
 import 'delivery_route_screen.dart';
 
 class DeliveryHomeScreen extends ConsumerStatefulWidget {
@@ -18,6 +21,7 @@ class DeliveryHomeScreen extends ConsumerStatefulWidget {
 class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
   StreamSubscription<Position>? _positionSub;
   int? _trackingOrderId;
+  Position? _currentPosition;
 
   @override
   void initState() {
@@ -42,6 +46,10 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
         }
         return;
       }
+      final pos = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      ).catchError((_) => null);
+      if (mounted) setState(() => _currentPosition = pos);
       setState(() => _trackingOrderId = orderId);
       _positionSub?.cancel();
       _positionSub = Geolocator.getPositionStream(
@@ -50,6 +58,7 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
           distanceFilter: 50,
         ),
       ).listen((pos) async {
+        if (mounted) setState(() => _currentPosition = pos);
         await ref.read(ordersProvider.notifier).updateDeliveryLocation(
           orderId, pos.latitude, pos.longitude,
         );
@@ -61,7 +70,10 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
       }
     } else {
       _positionSub?.cancel();
-      setState(() => _trackingOrderId = null);
+      setState(() {
+        _trackingOrderId = null;
+        _currentPosition = null;
+      });
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Live tracking stopped')),
@@ -137,6 +149,24 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
                               SizedBox(width: 8),
                               Text('Sharing live location...', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
                             ],
+                          ),
+                        ),
+                      if (isTracking && order.deliveryLat != null && order.deliveryLng != null)
+                        Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          height: 120,
+                          clipBehavior: Clip.antiAlias,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppTheme.primaryColor.withAlpha(40)),
+                          ),
+                          child: DeliveryRadiusMap(
+                            center: _currentPosition != null
+                                ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
+                                : LatLng(AppConfig.storeLat, AppConfig.storeLng),
+                            marker: LatLng(order.deliveryLat!, order.deliveryLng!),
+                            initialZoom: 13,
+                            showTierCircles: false,
                           ),
                         ),
                       Row(children: [

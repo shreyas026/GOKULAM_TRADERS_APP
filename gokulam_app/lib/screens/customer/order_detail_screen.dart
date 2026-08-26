@@ -246,17 +246,43 @@ class _OrderDetailScreenState extends ConsumerState<OrderDetailScreen> {
           if (hasAgent)
             Padding(
               padding: const EdgeInsets.all(12),
-              child: Row(
+              child: Column(
                 children: [
-                  Icon(Icons.delivery_dining, color: AppTheme.primaryColor),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Delivery agent${order.assignedTo != null ? ' (${order.assignedTo})' : ''} is on the way',
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  Row(
+                    children: [
+                      Icon(Icons.delivery_dining, color: AppTheme.primaryColor),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Delivery agent${order.assignedTo != null ? ' (${order.assignedTo})' : ''} is on the way',
+                          style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.open_in_new, size: 18),
+                      label: const Text('Track Live on Full Screen'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.primaryColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 10),
+                      ),
+                      onPressed: () => context.go('/orders/${order.id}/track'),
                     ),
                   ),
                 ],
+              ),
+            ),
+          if (!hasAgent && order.status == 'out_for_delivery')
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Text(
+                'Waiting for delivery agent to start tracking...',
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
               ),
             ),
         ],
