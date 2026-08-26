@@ -149,8 +149,9 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
                     if dist_km > store.delivery_radius_km:
                         return Response({'error': f'Delivery address is {dist_km:.1f} km away. Maximum {store.delivery_radius_km} km allowed.'}, status=400)
                     from math import ceil
+                    from decimal import Decimal as _Decimal
                     half_km_charge = float(store.delivery_charge_per_half_km)
-                    delivery_charge = max(half_km_charge, ceil(dist_km / 0.5) * half_km_charge)
+                    delivery_charge = _Decimal(str(max(half_km_charge, ceil(dist_km / 0.5) * half_km_charge)))
                 else:
                     delivery_charge = 5
             total = subtotal + total_gst + delivery_charge - discount
@@ -187,7 +188,7 @@ class OrderViewSet(viewsets.ReadOnlyModelViewSet):
             if serializer.data['payment_method'] == Order.PaymentMethod.CREDIT:
                 credit, _ = CustomerCredit.objects.get_or_create(customer=request.user)
                 if credit.outstanding + total > credit.credit_limit:
-                    raise serializers.ValidationError({'error': 'Credit limit exceeded'})
+                    return Response({'error': 'Credit limit exceeded'}, status=400)
                 credit.outstanding += total
                 credit.total_credit_given += total
                 credit.save()

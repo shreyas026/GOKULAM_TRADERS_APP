@@ -18,6 +18,9 @@ class CustomerCredit(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        unique_together = [('customer', 'party_type')]
+
     def __str__(self):
         if self.party_type == 'supplier':
             return f"Supplier: {self.supplier_name} - Outstanding: {self.outstanding}"
@@ -55,7 +58,7 @@ class Payment(models.Model):
 
     order = models.ForeignKey('orders.Order', on_delete=models.CASCADE, related_name='payments')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)   
     payment_method = models.CharField(max_length=20)
     transaction_id = models.CharField(max_length=100, blank=True)
     razorpay_order_id = models.CharField(max_length=100, blank=True)
@@ -64,4 +67,4 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment {self.transaction_id} - {self.amount}"
+        return f"Payment {self.transaction_id} - {self.amount}"                  

@@ -13,4 +13,6 @@ urlpatterns = [
     path('credits/customers/', views.CustomerCreditViewSet.as_view({'get': 'customers'}), name='credit-customers'),
     path('credits/suppliers/', views.CustomerCreditViewSet.as_view({'get': 'suppliers'}), name='credit-suppliers'),
     path('credits/add_supplier/', views.CustomerCreditViewSet.as_view({'post': 'add_supplier'}), name='add-supplier'),
+    path('credits/summary/', views.CustomerCreditViewSet.as_view({'get': 'summary'}), name='credit-summary'),
+    path('credits/all_transactions/', views.CustomerCreditViewSet.as_view({'get': 'all_transactions'}), name='all-transactions'),
 ]
