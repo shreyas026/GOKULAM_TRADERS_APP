@@ -55,6 +55,8 @@ class _WishlistScreenState extends ConsumerState<WishlistScreen> {
                       child: CachedNetworkImage(
                         imageUrl: product?.primaryImage ?? '',
                         width: 50, height: 50, fit: BoxFit.cover,
+                        memCacheWidth: 120,
+                        maxWidthDiskCache: 120,
                         placeholder: (_, __) => Container(color: Colors.grey[200]),
                         errorWidget: (_, __, ___) => Container(color: Colors.grey[200], child: const Icon(Icons.image)),
                       ),

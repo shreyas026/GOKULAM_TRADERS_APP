@@ -2,7 +2,20 @@ class AppConfig {
   static const String appName = 'Gokulam Traders';
   static const String apiBaseUrl = 'https://web-production-1b48f1.up.railway.app/api';
   static const int deliveryRadiusKm = 5;
-  static const double deliveryCharge = 20.0;
+  static const double deliveryChargePerHalfKm = 5.0;
+
+  static double deliveryChargeForDistance(double distanceKm) {
+    return deliveryChargeForDistanceBooking(distanceKm, deliveryChargePerHalfKm);
+  }
+
+  static double deliveryChargeForDistanceBooking(double distanceKm, double chargePerHalfKm) {
+    if (distanceKm <= 0) return 0;
+    final slabs = (distanceKm / 0.5).ceil();
+    return slabs * chargePerHalfKm;
+  }
+
+  static const double storeLat = 12.9716;
+  static const double storeLng = 77.5946;
 }
 
 class ApiEndpoints {
@@ -12,6 +25,7 @@ class ApiEndpoints {
   static const String changePassword = '/auth/change-password/';
   static const String addresses = '/auth/addresses/';
   static const String customers = '/auth/customers/';
+  static const String users = '/auth/users/';
   static const String updateFcm = '/auth/update-fcm/';
 
   static const String products = '/products/';
@@ -28,9 +42,14 @@ class ApiEndpoints {
   static const String orders = '/orders/';
   static const String orderCreate = '/orders/create_order/';
   static const String wishlist = '/wishlist/';
+  static const String storeLocation = '/store/location/';
 
   static const String credits = '/khata/credits/';
   static const String myCredit = '/khata/credits/my_credit/';
+  static const String creditSummary = '/khata/credits/summary/';
+  static const String creditCustomers = '/khata/credits/customers/';
+  static const String creditSuppliers = '/khata/credits/suppliers/';
+  static const String allTransactions = '/khata/credits/all_transactions/';
   static const String payments = '/khata/payments/';
   static const String paymentInitiate = '/khata/payment/initiate/';
 }

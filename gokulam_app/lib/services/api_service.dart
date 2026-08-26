@@ -30,7 +30,7 @@ class ApiService {
           if (refreshToken != null) {
             try {
               final response = await Dio().post(
-                '${AppConfig.apiBaseUrl}/auth/login/',
+                '${AppConfig.apiBaseUrl}/auth/token/refresh/',
                 data: {'refresh': refreshToken},
               );
               final newAccess = response.data['access'];
@@ -61,5 +61,16 @@ class ApiService {
   Future<Response> patch(String path, {dynamic data}) =>
       _dio.patch(path, data: data);
 
+  Future<Response> put(String path, {dynamic data}) =>
+      _dio.put(path, data: data);
+
   Future<Response> delete(String path) => _dio.delete(path);
+
+  Future<Response> uploadFile(String path, String filePath,
+      {String fieldName = 'image'}) async {
+    final formData = FormData.fromMap({
+      fieldName: await MultipartFile.fromFile(filePath),
+    });
+    return _dio.post(path, data: formData);
+  }
 }

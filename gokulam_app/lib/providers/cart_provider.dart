@@ -70,7 +70,8 @@ class WishlistNotifier extends StateNotifier<AsyncValue<List<CartItemModel>>> {
     try {
       final api = ApiService();
       final res = await api.get(ApiEndpoints.wishlist);
-      final list = (res.data as List).map((e) => CartItemModel.fromJson(e)).toList();
+      final results = res.data['results'] as List? ?? res.data as List;
+      final list = results.map((e) => CartItemModel.fromJson(e)).toList();
       state = AsyncData(list);
     } catch (e) {
       state = AsyncError(e, StackTrace.current);

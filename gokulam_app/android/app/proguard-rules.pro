@@ -1,0 +1,8 @@
+-keep class com.google.android.gms.** { *; }
+-dontwarn com.google.android.gms.**
+-keep class io.flutter.** { *; }
+-dontwarn io.flutter.**
+-keep class com.itextpdf.** { *; }
+-dontwarn com.itextpdf.**
+-keep class com.benjaminwiebe.printing.** { *; }
+-keep class net.nfyl.** { *; }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../models/order_model.dart';
 import '../../providers/orders_provider.dart';
 import '../../config/theme.dart';
 
@@ -51,12 +52,56 @@ class _AdminOrdersScreenState extends ConsumerState<AdminOrdersScreen> {
                 subtitle: Text('₹${filtered[i].totalAmount.toStringAsFixed(0)} | ${filtered[i].itemCount} items'),
                 trailing: _statusChip(filtered[i].status),
                 onTap: () => context.go('/orders/${filtered[i].id}'),
+                onLongPress: filtered[i].deliveryType == 'home_delivery'
+                    ? () => _assignDelivery(filtered[i])
+                    : null,
               ),
             ),
           );
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (_, __) => const Center(child: Text('Failed to load')),
+      ),
+    );
+  }
+
+  void _assignDelivery(OrderModel order) {
+    final staffAsync = ref.read(deliveryStaffProvider.future);
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      builder: (ctx) => FutureBuilder(
+        future: staffAsync,
+        builder: (_, snap) {
+          final staff = snap.data ?? [];
+          return SafeArea(
+            child: staff.isEmpty
+                ? const Padding(padding: EdgeInsets.all(24), child: Center(child: Text('No delivery staff available')))
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Padding(padding: EdgeInsets.all(16), child: Text('Assign Delivery Staff', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
+                      Flexible(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: staff.map((s) => ListTile(
+                            leading: const CircleAvatar(child: Icon(Icons.delivery_dining)),
+                            title: Text(s.username),
+                            subtitle: Text(s.phone.isNotEmpty ? s.phone : 'Delivery Staff'),
+                            onTap: () {
+                              Navigator.pop(ctx);
+                              ref.read(ordersProvider.notifier).assignDelivery(order.id, s.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Order ${order.orderId} assigned to ${s.username}')),
+                              );
+                            },
+                          )).toList(),
+                        ),
+                      ),
+                    ],
+                  ),
+          );
+        },
       ),
     );
   }

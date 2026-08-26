@@ -26,20 +26,23 @@ class AuthService {
     return {'user': user, 'tokens': tokens};
   }
 
-  Future<UserModel> register(Map<String, dynamic> data) async {
+  Future<RegisterResult> register(Map<String, dynamic> data) async {
     final res = await _api.post(ApiEndpoints.register, data: data);
     final user = UserModel.fromJson(res.data['user']);
-    final tokens = res.data['tokens'];
-    await StorageService.saveTokens(
-      access: tokens['access'],
-      refresh: tokens['refresh'],
-    );
-    await StorageService.saveData(
-      role: user.role,
-      id: user.id,
-      username: user.username,
-    );
-    return user;
+    final tokens = res.data['tokens'] as Map<String, dynamic>?;
+    final pending = res.data['pending'] == true;
+    if (tokens != null) {
+      await StorageService.saveTokens(
+        access: tokens['access'],
+        refresh: tokens['refresh'],
+      );
+      await StorageService.saveData(
+        role: user.role,
+        id: user.id,
+        username: user.username,
+      );
+    }
+    return RegisterResult(user: user, pending: pending);
   }
 
   Future<UserModel> getProfile() async {
@@ -57,4 +60,10 @@ class AuthService {
   }
 
   Future<String?> getUserRole() => StorageService.getUserRole();
+}
+
+class RegisterResult {
+  final UserModel user;
+  final bool pending;
+  RegisterResult({required this.user, required this.pending});
 }

@@ -10,7 +10,8 @@ import '../../config/theme.dart';
 final addressesProvider = FutureProvider.autoDispose<List<AddressModel>>((ref) async {
   final api = ApiService();
   final res = await api.get(ApiEndpoints.addresses);
-  return (res.data as List).map((e) => AddressModel.fromJson(e)).toList();
+  final results = res.data['results'] as List? ?? res.data as List;
+  return results.map((e) => AddressModel.fromJson(e)).toList();
 });
 
 class AddressesScreen extends ConsumerWidget {

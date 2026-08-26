@@ -19,11 +19,16 @@ import '../screens/admin/admin_products.dart';
 import '../screens/admin/admin_orders.dart';
 import '../screens/admin/admin_inventory.dart';
 import '../screens/admin/admin_customers.dart';
+import '../screens/admin/admin_product_form.dart';
+import '../screens/admin/admin_categories.dart';
+import '../screens/admin/admin_store_settings_screen.dart';
 import '../screens/cashier/billing_screen.dart';
 import '../screens/delivery/delivery_home.dart';
+import '../screens/delivery/delivery_route_screen.dart';
 import '../screens/khata/khata_screen.dart';
 import '../screens/khata/credit_detail_screen.dart';
 import '../screens/customer/addresses_screen.dart';
+import '../screens/customer/category_products_screen.dart';
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 final _shellNavigatorKey = GlobalKey<NavigatorState>();
@@ -54,6 +59,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(path: '/home', builder: (_, __) => const HomeScreen()),
           GoRoute(path: '/products', builder: (_, __) => const ProductListScreen()),
+          GoRoute(path: '/products/category/:id/:name', builder: (_, s) => CategoryProductsScreen(
+            categoryId: int.parse(s.pathParameters['id']!),
+            categoryName: Uri.decodeComponent(s.pathParameters['name']!),
+          )),
           GoRoute(path: '/products/:id', builder: (_, s) => ProductDetailScreen(id: int.parse(s.pathParameters['id']!))),
           GoRoute(path: '/cart', builder: (_, __) => const CartScreen()),
           GoRoute(path: '/checkout', builder: (_, __) => const CheckoutScreen()),
@@ -63,11 +72,16 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/profile', builder: (_, __) => const ProfileScreen()),
           GoRoute(path: '/admin', builder: (_, __) => const AdminDashboard()),
           GoRoute(path: '/admin/products', builder: (_, __) => const AdminProductsScreen()),
+          GoRoute(path: '/admin/products/add', builder: (_, __) => const AdminProductFormScreen()),
+          GoRoute(path: '/admin/products/edit/:id', builder: (_, s) => AdminProductFormScreen(productId: int.parse(s.pathParameters['id']!))),
+          GoRoute(path: '/admin/categories', builder: (_, __) => const AdminCategoriesScreen()),
           GoRoute(path: '/admin/orders', builder: (_, __) => const AdminOrdersScreen()),
           GoRoute(path: '/admin/inventory', builder: (_, __) => const AdminInventoryScreen()),
           GoRoute(path: '/admin/customers', builder: (_, __) => const AdminCustomersScreen()),
+          GoRoute(path: '/admin/store-settings', builder: (_, __) => const AdminStoreSettingsScreen()),
           GoRoute(path: '/billing', builder: (_, __) => const BillingScreen()),
           GoRoute(path: '/delivery', builder: (_, __) => const DeliveryHomeScreen()),
+          GoRoute(path: '/delivery/route/:id', builder: (_, s) => DeliveryRouteScreen(orderId: int.parse(s.pathParameters['id']!))),
           GoRoute(path: '/khata', builder: (_, __) => const KhataScreen()),
           GoRoute(path: '/khata/:id', builder: (_, s) => CreditDetailScreen(creditId: int.parse(s.pathParameters['id']!))),
           GoRoute(path: '/profile/addresses', builder: (_, __) => const AddressesScreen()),
@@ -114,6 +128,7 @@ class _MainShell extends ConsumerWidget {
     if (role == 'admin') return [
       _NavItem('Dashboard', Icons.dashboard, '/admin'),
       _NavItem('Products', Icons.inventory_2, '/admin/products'),
+      _NavItem('Categories', Icons.category, '/admin/categories'),
       _NavItem('Orders', Icons.receipt_long, '/admin/orders'),
       _NavItem('Khata', Icons.book, '/khata'),
       _NavItem('Profile', Icons.person, '/profile'),

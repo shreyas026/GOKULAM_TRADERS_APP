@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../providers/products_provider.dart';
+import '../../services/api_service.dart';
+import '../../config/app_config.dart';
 import '../../config/theme.dart';
 
 class AdminProductsScreen extends ConsumerWidget {
@@ -14,15 +16,12 @@ class AdminProductsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(title: const Text('Manage Products'), actions: [
-        IconButton(icon: const Icon(Icons.add), onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Add product - coming soon')));
-        }),
+        IconButton(icon: const Icon(Icons.add), onPressed: () => context.go('/admin/products/add')),
       ]),
       body: productsAsync.when(
         data: (products) => RefreshIndicator(
-          onRefresh: () {
+          onRefresh: () async {
             ref.invalidate(productsProvider(''));
-            return Future.value();
           },
           child: ListView.builder(
             padding: const EdgeInsets.all(8),
@@ -32,7 +31,11 @@ class AdminProductsScreen extends ConsumerWidget {
               child: ListTile(
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: CachedNetworkImage(imageUrl: products[i].primaryImage, width: 50, height: 50, fit: BoxFit.cover,
+                  child: CachedNetworkImage(
+                    imageUrl: products[i].primaryImage,
+                    width: 50, height: 50, fit: BoxFit.cover,
+                    memCacheWidth: 120,
+                    maxWidthDiskCache: 120,
                     placeholder: (_, __) => Container(color: Colors.grey[200]),
                     errorWidget: (_, __, ___) => Container(color: Colors.grey[200], child: const Icon(Icons.image)),
                   ),
@@ -45,9 +48,7 @@ class AdminProductsScreen extends ConsumerWidget {
                     fontWeight: FontWeight.bold,
                   )),
                   const SizedBox(width: 8),
-                  IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Edit ${products[i].name} - coming soon')));
-                  }),
+                  IconButton(icon: const Icon(Icons.edit_outlined, size: 20), onPressed: () => context.go('/admin/products/edit/${products[i].id}')),
                 ]),
               ),
             ),

@@ -1,7 +1,59 @@
+# Flutter
+gokulam_app/.dart_tool/
+gokulam_app/.packages
+gokulam_app/build/
+gokulam_app/.flutter-plugins
+gokulam_app/.flutter-plugins-dependencies
+gokulam_app/.metadata
+gokulam_app/pubspec.lock
+gokulam_app/android/.gradle/
+gokulam_app/android/app/build/
+gokulam_app/android/local.properties
+gokulam_app/android/.kotlin/
+gokulam_app/ios/Pods/
+gokulam_app/ios/.symlinks/
+gokulam_app/ios/Flutter/Flutter.framework
+gokulam_app/ios/Flutter/Flutter.podspec
+gokulam_app/ios/Flutter/Generated.xcconfig
+gokulam_app/ios/Flutter/app.framework
+gokulam_app/ios/Flutter/flutter_export_environment.sh
+gokulam_app/ios/ServiceDefinitions.json
+gokulam_app/ios/Runner/GeneratedPluginRegistrant.*
+gokulam_app/linux/
+gokulam_app/macos/
+gokulam_app/web/
+gokulam_app/windows/
+gokulam_app/gokulam_app/
+
+# Python
 __pycache__/
 *.pyc
-media/
-db.sqlite3
-.venv/
+*.pyo
+*.pyd
+.Python
+*.sqlite3
+env/
 venv/
 .env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Flutter build outputs
+*.apk
+*.aab
+*.ipa
+
+# gokulam_backend has its own copy of gokulam_app (ignore it)
+gokulam_backend/gokulam_app/
+
+# Misc
+*.json
+!package.json

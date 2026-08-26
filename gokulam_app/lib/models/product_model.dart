@@ -21,6 +21,41 @@ class CategoryModel {
   }
 }
 
+class BrandModel {
+  final int id;
+  final String name;
+  final bool isActive;
+
+  BrandModel({
+    required this.id,
+    required this.name,
+    this.isActive = true,
+  });
+
+  factory BrandModel.fromJson(Map<String, dynamic> json) {
+    return BrandModel(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+      isActive: json['is_active'] ?? true,
+    );
+  }
+}
+
+double parseDouble(dynamic v, [double fallback = 0]) {
+  if (v == null) return fallback;
+  if (v is num) return v.toDouble();
+  if (v is String) return double.tryParse(v) ?? fallback;
+  return fallback;
+}
+
+int parseInt(dynamic v, [int fallback = 0]) {
+  if (v == null) return fallback;
+  if (v is int) return v;
+  if (v is num) return v.toInt();
+  if (v is String) return int.tryParse(v) ?? fallback;
+  return fallback;
+}
+
 class ProductModel {
   final int id;
   final String name;
@@ -76,7 +111,7 @@ class ProductModel {
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       name: json['name'] ?? '',
       category: json['category'],
       categoryName: json['category_name'] ?? '',
@@ -84,18 +119,18 @@ class ProductModel {
       brandName: json['brand_name'] ?? '',
       sku: json['sku'] ?? '',
       barcode: json['barcode'] ?? '',
-      mrp: (json['mrp'] ?? 0).toDouble(),
-      sellingPrice: (json['selling_price'] ?? 0).toDouble(),
-      discountPercent: (json['discount_percent'] ?? 0).toDouble(),
-      gstPercent: (json['gst_percent'] ?? 18).toDouble(),
-      stock: json['stock'] ?? 0,
-      lowStockThreshold: json['low_stock_threshold'] ?? 5,
+      mrp: parseDouble(json['mrp']),
+      sellingPrice: parseDouble(json['selling_price']),
+      discountPercent: parseDouble(json['discount_percent']),
+      gstPercent: parseDouble(json['gst_percent'], 18),
+      stock: parseInt(json['stock']),
+      lowStockThreshold: parseInt(json['low_stock_threshold'], 5),
       images: json['images'] != null ? List<String>.from(json['images']) : [],
       primaryImage: json['primary_image'] ?? '',
       isAvailable: json['is_available'] ?? true,
       isFeatured: json['is_featured'] ?? false,
-      rating: (json['rating'] ?? 0).toDouble(),
-      totalSold: json['total_sold'] ?? 0,
+      rating: parseDouble(json['rating']),
+      totalSold: parseInt(json['total_sold']),
       description: json['description'] ?? '',
       weight: json['weight'] ?? '',
       dimensions: json['dimensions'] ?? '',
@@ -154,10 +189,10 @@ class CouponModel {
   factory CouponModel.fromJson(Map<String, dynamic> json) {
     return CouponModel(
       code: json['code'] ?? '',
-      discountPercent: (json['discount_percent'] ?? 0).toDouble(),
-      discountAmount: (json['discount_amount'] ?? 0).toDouble(),
-      minOrderAmount: (json['min_order_amount'] ?? 0).toDouble(),
-      maxDiscount: json['max_discount']?.toDouble(),
+      discountPercent: parseDouble(json['discount_percent']),
+      discountAmount: parseDouble(json['discount_amount']),
+      minOrderAmount: parseDouble(json['min_order_amount']),
+      maxDiscount: json['max_discount'] != null ? parseDouble(json['max_discount']) : null,
       valid: json['valid'] ?? false,
     );
   }

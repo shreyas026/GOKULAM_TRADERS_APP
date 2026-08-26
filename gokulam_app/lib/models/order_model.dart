@@ -17,13 +17,13 @@ class CartItemModel {
 
   factory CartItemModel.fromJson(Map<String, dynamic> json) {
     return CartItemModel(
-      id: json['id'] ?? 0,
-      product: json['product'] ?? 0,
+      id: parseInt(json['id']),
+      product: parseInt(json['product']),
       productDetail: json['product_detail'] != null
           ? ProductModel.fromJson(json['product_detail'])
           : null,
-      quantity: json['quantity'] ?? 1,
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
+      quantity: parseInt(json['quantity'], 1),
+      subtotal: parseDouble(json['subtotal']),
     );
   }
 }
@@ -41,11 +41,11 @@ class CartModel {
 
   factory CartModel.fromJson(Map<String, dynamic> json) {
     return CartModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       items: json['items'] != null
           ? (json['items'] as List).map((e) => CartItemModel.fromJson(e)).toList()
           : [],
-      total: (json['total'] ?? 0).toDouble(),
+      total: parseDouble(json['total']),
     );
   }
 
@@ -68,6 +68,9 @@ class OrderModel {
   final String createdAt;
   final int itemCount;
   final String firstItemImage;
+  final double? deliveryLat;
+  final double? deliveryLng;
+  final String deliveryAddressText;
 
   OrderModel({
     required this.id,
@@ -85,25 +88,35 @@ class OrderModel {
     this.createdAt = '',
     this.itemCount = 0,
     this.firstItemImage = '',
+    this.deliveryLat,
+    this.deliveryLng,
+    this.deliveryAddressText = '',
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) {
     return OrderModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       orderId: json['order_id'] ?? '',
       status: json['status'] ?? 'pending',
       deliveryType: json['delivery_type'] ?? 'home_delivery',
       paymentMethod: json['payment_method'] ?? 'cash',
       paymentStatus: json['payment_status'] ?? 'pending',
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
-      gstAmount: (json['gst_amount'] ?? 0).toDouble(),
-      discountAmount: (json['discount_amount'] ?? 0).toDouble(),
-      deliveryCharge: (json['delivery_charge'] ?? 0).toDouble(),
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
+      subtotal: parseDouble(json['subtotal']),
+      gstAmount: parseDouble(json['gst_amount']),
+      discountAmount: parseDouble(json['discount_amount']),
+      deliveryCharge: parseDouble(json['delivery_charge']),
+      totalAmount: parseDouble(json['total_amount']),
       notes: json['notes'] ?? '',
       createdAt: json['created_at'] ?? '',
-      itemCount: json['item_count'] ?? 0,
+      itemCount: parseInt(json['item_count']),
       firstItemImage: json['first_item_image'] ?? '',
+      deliveryLat: json['delivery_lat'] != null
+          ? (json['delivery_lat'] is num ? (json['delivery_lat'] as num).toDouble() : double.tryParse(json['delivery_lat'].toString()))
+          : null,
+      deliveryLng: json['delivery_lng'] != null
+          ? (json['delivery_lng'] is num ? (json['delivery_lng'] as num).toDouble() : double.tryParse(json['delivery_lng'].toString()))
+          : null,
+      deliveryAddressText: json['delivery_address_text'] ?? '',
     );
   }
 
@@ -144,14 +157,14 @@ class OrderItemModel {
 
   factory OrderItemModel.fromJson(Map<String, dynamic> json) {
     return OrderItemModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       productName: json['product_name'] ?? '',
       productImage: json['product_image'] ?? '',
-      quantity: json['quantity'] ?? 1,
-      price: (json['price'] ?? 0).toDouble(),
-      gstPercent: (json['gst_percent'] ?? 0).toDouble(),
-      gstAmount: (json['gst_amount'] ?? 0).toDouble(),
-      total: (json['total'] ?? 0).toDouble(),
+      quantity: parseInt(json['quantity'], 1),
+      price: parseDouble(json['price']),
+      gstPercent: parseDouble(json['gst_percent']),
+      gstAmount: parseDouble(json['gst_amount']),
+      total: parseDouble(json['total']),
     );
   }
 }
@@ -159,6 +172,9 @@ class OrderItemModel {
 class OrderDetailModel extends OrderModel {
   final List<OrderItemModel> items;
   final dynamic deliveryAddressDetail;
+  final double? currentLat;
+  final double? currentLng;
+  final String? assignedTo;
 
   OrderDetailModel({
     required super.id,
@@ -178,29 +194,39 @@ class OrderDetailModel extends OrderModel {
     super.firstItemImage,
     this.items = const [],
     this.deliveryAddressDetail,
+    this.currentLat,
+    this.currentLng,
+    this.assignedTo,
   });
 
   factory OrderDetailModel.fromJson(Map<String, dynamic> json) {
     return OrderDetailModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       orderId: json['order_id'] ?? '',
       status: json['status'] ?? 'pending',
       deliveryType: json['delivery_type'] ?? 'home_delivery',
       paymentMethod: json['payment_method'] ?? 'cash',
       paymentStatus: json['payment_status'] ?? 'pending',
-      subtotal: (json['subtotal'] ?? 0).toDouble(),
-      gstAmount: (json['gst_amount'] ?? 0).toDouble(),
-      discountAmount: (json['discount_amount'] ?? 0).toDouble(),
-      deliveryCharge: (json['delivery_charge'] ?? 0).toDouble(),
-      totalAmount: (json['total_amount'] ?? 0).toDouble(),
+      subtotal: parseDouble(json['subtotal']),
+      gstAmount: parseDouble(json['gst_amount']),
+      discountAmount: parseDouble(json['discount_amount']),
+      deliveryCharge: parseDouble(json['delivery_charge']),
+      totalAmount: parseDouble(json['total_amount']),
       notes: json['notes'] ?? '',
       createdAt: json['created_at'] ?? '',
-      itemCount: json['item_count'] ?? 0,
+      itemCount: parseInt(json['item_count']),
       firstItemImage: json['first_item_image'] ?? '',
       items: json['items'] != null
           ? (json['items'] as List).map((e) => OrderItemModel.fromJson(e)).toList()
           : [],
       deliveryAddressDetail: json['delivery_address_detail'],
+      currentLat: json['current_lat'] != null
+          ? (json['current_lat'] is num ? (json['current_lat'] as num).toDouble() : double.tryParse(json['current_lat'].toString()))
+          : null,
+      currentLng: json['current_lng'] != null
+          ? (json['current_lng'] is num ? (json['current_lng'] as num).toDouble() : double.tryParse(json['current_lng'].toString()))
+          : null,
+      assignedTo: json['assigned_to']?.toString(),
     );
   }
 }
@@ -210,6 +236,7 @@ class CreditModel {
   final int customer;
   final String? customerDetail;
   final String? displayName;
+  final String? customerPhone;
   final String? supplierName;
   final String? partyType;
   final double creditLimit;
@@ -224,6 +251,7 @@ class CreditModel {
     required this.customer,
     this.customerDetail,
     this.displayName,
+    this.customerPhone,
     this.supplierName,
     this.partyType,
     this.creditLimit = 5000,
@@ -235,17 +263,24 @@ class CreditModel {
   });
 
   factory CreditModel.fromJson(Map<String, dynamic> json) {
+    String? phone;
+    if (json['customer_phone'] != null) {
+      phone = json['customer_phone'].toString();
+    } else if (json['customer_detail'] is Map) {
+      phone = json['customer_detail']['phone']?.toString();
+    }
     return CreditModel(
-      id: json['id'] ?? 0,
-      customer: json['customer'] ?? 0,
-      customerDetail: json['customer_detail']?.toString(),
+      id: parseInt(json['id']),
+      customer: parseInt(json['customer']),
+      customerDetail: json['customer_detail'] is Map ? null : json['customer_detail']?.toString(),
       displayName: json['display_name'],
+      customerPhone: phone,
       supplierName: json['supplier_name'],
       partyType: json['party_type'],
-      creditLimit: (json['credit_limit'] ?? 5000).toDouble(),
-      outstanding: (json['outstanding'] ?? 0).toDouble(),
-      totalCreditGiven: (json['total_credit_given'] ?? 0).toDouble(),
-      totalRepaid: (json['total_repaid'] ?? 0).toDouble(),
+      creditLimit: parseDouble(json['credit_limit'], 5000),
+      outstanding: parseDouble(json['outstanding']),
+      totalCreditGiven: parseDouble(json['total_credit_given']),
+      totalRepaid: parseDouble(json['total_repaid']),
       isActive: json['is_active'] ?? true,
       transactions: json['transactions'] != null
           ? (json['transactions'] as List).map((e) => CreditTransactionModel.fromJson(e)).toList()
@@ -275,10 +310,10 @@ class CreditTransactionModel {
 
   factory CreditTransactionModel.fromJson(Map<String, dynamic> json) {
     return CreditTransactionModel(
-      id: json['id'] ?? 0,
+      id: parseInt(json['id']),
       transactionType: json['transaction_type'] ?? '',
-      amount: (json['amount'] ?? 0).toDouble(),
-      balanceAfter: (json['balance_after'] ?? 0).toDouble(),
+      amount: parseDouble(json['amount']),
+      balanceAfter: parseDouble(json['balance_after']),
       note: json['note'] ?? '',
       createdAt: json['created_at'] ?? '',
     );
@@ -302,11 +337,11 @@ class DashboardStats {
 
   factory DashboardStats.fromJson(Map<String, dynamic> json) {
     return DashboardStats(
-      totalOrders: json['total_orders'] ?? 0,
-      pendingOrders: json['pending_orders'] ?? 0,
-      totalRevenue: (json['total_revenue'] ?? 0).toDouble(),
-      totalProducts: json['total_products'] ?? 0,
-      lowStock: json['low_stock'] ?? 0,
+      totalOrders: parseInt(json['total_orders']),
+      pendingOrders: parseInt(json['pending_orders']),
+      totalRevenue: parseDouble(json['total_revenue']),
+      totalProducts: parseInt(json['total_products']),
+      lowStock: parseInt(json['low_stock']),
     );
   }
 }

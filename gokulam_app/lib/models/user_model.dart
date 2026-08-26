@@ -61,7 +61,7 @@ class AddressModel {
   final bool isDefault;
 
   AddressModel({
-    required this.id,
+    this.id = 0,
     this.label = 'Home',
     this.fullAddress = '',
     this.city = '',
@@ -80,8 +80,8 @@ class AddressModel {
       city: json['city'] ?? '',
       state: json['state'] ?? '',
       pincode: json['pincode'] ?? '',
-      latitude: json['latitude']?.toDouble(),
-      longitude: json['longitude']?.toDouble(),
+      latitude: json['latitude'] != null ? (json['latitude'] is num ? json['latitude'].toDouble() : double.tryParse(json['latitude'].toString())) : null,
+      longitude: json['longitude'] != null ? (json['longitude'] is num ? json['longitude'].toDouble() : double.tryParse(json['longitude'].toString())) : null,
       isDefault: json['is_default'] ?? false,
     );
   }

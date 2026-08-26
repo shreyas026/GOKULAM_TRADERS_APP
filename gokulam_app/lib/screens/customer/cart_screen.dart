@@ -58,6 +58,8 @@ class _CartScreenState extends ConsumerState<CartScreen> {
                               child: CachedNetworkImage(
                                 imageUrl: product?.primaryImage ?? '',
                                 width: 80, height: 80, fit: BoxFit.cover,
+                                memCacheWidth: 160,
+                                maxWidthDiskCache: 160,
                                 placeholder: (_, __) => Container(width: 80, height: 80, color: Colors.grey[200]),
                                 errorWidget: (_, __, ___) => Container(width: 80, height: 80, color: Colors.grey[200], child: const Icon(Icons.image)),
                               ),

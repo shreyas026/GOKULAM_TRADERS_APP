@@ -8,7 +8,8 @@ final customersProvider = FutureProvider.autoDispose<List<UserModel>>((ref) asyn
   final api = ApiService();
   try {
     final res = await api.get(ApiEndpoints.customers);
-    return (res.data as List).map((e) => UserModel.fromJson(e)).toList();
+    final results = res.data['results'] as List? ?? res.data as List;
+    return results.map((e) => UserModel.fromJson(e)).toList();
   } catch (e) {
     return [];
   }
