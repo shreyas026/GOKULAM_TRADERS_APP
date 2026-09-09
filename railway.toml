@@ -1,2 +1,7 @@
 [build]
-rootDirectory = "gokulam_backend"
+buildCommand = "cd gokulam_backend && pip install -r requirements.txt"
+
+[deploy]
+startCommand = "cd gokulam_backend && python manage.py migrate --noinput && python seed_data.py && gunicorn gokulam_backend.wsgi --bind 0.0.0.0:$PORT"
+healthcheckPath = "/api/products/"
+healthcheckTimeout = 300
