@@ -1,16 +1,10 @@
 import os
-import sys
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'gokulam_backend.settings')
 
-import django
-django.setup()
-
-from django.core.management import call_command
-if 'migrate' not in ' '.join(sys.argv):
-    call_command('migrate', '--noinput')
-    seed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'seed_data.py')
-    exec(open(seed_path).read())
-
+# Migrations and seeding run once in the start command, before gunicorn forks
+# its workers. Running them here would execute them in every worker
+# concurrently on each boot, which races on schema changes and on the
+# get_or_create inserts in seed_data.py.
 from django.core.wsgi import get_wsgi_application
 application = get_wsgi_application()
