@@ -7,3 +7,5 @@ venv/
 .env
 .env*
 .vercel
+staticfiles/
+backups/

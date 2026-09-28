@@ -4,6 +4,22 @@ class AppConfig {
   static const int deliveryRadiusKm = 5;
   static const double deliveryChargePerHalfKm = 5.0;
 
+  static String get origin {
+    final int cut = apiBaseUrl.lastIndexOf('/api');
+    return cut == -1 ? apiBaseUrl : apiBaseUrl.substring(0, cut);
+  }
+
+  static String resolveImage(String url) {
+    final String value = url.trim();
+    if (value.isEmpty) return '';
+    if (value.startsWith('http://') || value.startsWith('https://')) return value;
+    if (value.startsWith('/')) return '$origin$value';
+    return value;
+  }
+
+  static List<String> resolveImages(List<String> urls) =>
+      urls.map(resolveImage).toList(growable: false);
+
   static double deliveryChargeForDistance(double distanceKm) {
     return deliveryChargeForDistanceBooking(distanceKm, deliveryChargePerHalfKm);
   }

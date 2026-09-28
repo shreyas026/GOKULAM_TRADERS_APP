@@ -1,4 +1,5 @@
 import 'product_model.dart';
+import '../config/app_config.dart';
 
 class CartItemModel {
   final int id;
@@ -159,7 +160,7 @@ class OrderItemModel {
     return OrderItemModel(
       id: parseInt(json['id']),
       productName: json['product_name'] ?? '',
-      productImage: json['product_image'] ?? '',
+      productImage: AppConfig.resolveImage(json['product_image'] ?? ''),
       quantity: parseInt(json['quantity'], 1),
       price: parseDouble(json['price']),
       gstPercent: parseDouble(json['gst_percent']),

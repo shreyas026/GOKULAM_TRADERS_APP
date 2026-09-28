@@ -1,3 +1,5 @@
+import '../config/app_config.dart';
+
 class CategoryModel {
   final int id;
   final String name;
@@ -15,7 +17,7 @@ class CategoryModel {
     return CategoryModel(
       id: json['id'] ?? 0,
       name: json['name'] ?? '',
-      image: json['image'] ?? '',
+      image: AppConfig.resolveImage(json['image'] ?? ''),
       isActive: json['is_active'] ?? true,
     );
   }
@@ -125,8 +127,9 @@ class ProductModel {
       gstPercent: parseDouble(json['gst_percent'], 18),
       stock: parseInt(json['stock']),
       lowStockThreshold: parseInt(json['low_stock_threshold'], 5),
-      images: json['images'] != null ? List<String>.from(json['images']) : [],
-      primaryImage: json['primary_image'] ?? '',
+      images: AppConfig.resolveImages(
+          json['images'] != null ? List<String>.from(json['images']) : []),
+      primaryImage: AppConfig.resolveImage(json['primary_image'] ?? ''),
       isAvailable: json['is_available'] ?? true,
       isFeatured: json['is_featured'] ?? false,
       rating: parseDouble(json['rating']),
@@ -163,7 +166,7 @@ class BannerModel {
     return BannerModel(
       id: json['id'] ?? 0,
       title: json['title'] ?? '',
-      image: json['image'] ?? '',
+      image: AppConfig.resolveImage(json['image'] ?? ''),
       link: json['link'] ?? '',
     );
   }

@@ -14,6 +14,36 @@ from khata.models import CustomerCredit
 
 print("Seeding database...")
 
+STATIC_PRODUCT_IMAGES = '/static/images/products/'
+
+
+def generated_product_image(sku):
+    return f'{STATIC_PRODUCT_IMAGES}{sku.lower()}.jpg'
+
+
+def needs_image_refresh(current, desired):
+    """Decide whether a stored image should be replaced by the generated one.
+
+    Keeps a real photo that an admin uploaded, but replaces the old shared
+    Unsplash placeholder and anything empty, so every product ends up with its
+    own distinct image.
+    """
+    current = (current or '').strip()
+    if not current:
+        return True
+    if 'unsplash.com' in current:
+        return True
+    if desired.startswith('/static/') and not current.startswith('/static/'):
+        return '/media/' not in current
+    return current != desired
+
+
+def product_needs_image_refresh(images, desired):
+    if not images:
+        return True
+    first = images[0] if isinstance(images, (list, tuple)) else str(images)
+    return needs_image_refresh(str(first), desired)
+
 # Create users
 admin, created = User.objects.get_or_create(
     username='admin', defaults={'email': 'admin@gokulam.com', 'phone': '9876543200', 'role': 'admin', 'first_name': 'Admin', 'last_name': 'User', 'is_staff': True, 'is_superuser': True, 'address': 'Gokulam Store, Bangalore'}
@@ -59,23 +89,23 @@ print("Addresses created.")
 
 # Create categories
 categories_data = {
-    'Hardware': 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=200',
-    'Electrical': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
-    'Plumbing': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200',
-    'Tools': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200',
-    'Paints': 'https://images.unsplash.com/photo-1562259929-b4e1fd3aef09?w=200',
-    'Safety Equipment': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=200',
-    'Fasteners': 'https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=200',
-    'Pipes': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=200',
-    'Lighting': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200',
-    'Switches & Sockets': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=200',
-    'Chemicals': 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=200',
-    'Bathroom Fittings': 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=200',
+    'Hardware': '/static/images/categories/hardware.jpg',
+    'Electrical': '/static/images/categories/electrical.jpg',
+    'Plumbing': '/static/images/categories/plumbing.jpg',
+    'Tools': '/static/images/categories/tools.jpg',
+    'Paints': '/static/images/categories/paints.jpg',
+    'Safety Equipment': '/static/images/categories/safety-equipment.jpg',
+    'Fasteners': '/static/images/categories/fasteners.jpg',
+    'Pipes': '/static/images/categories/pipes.jpg',
+    'Lighting': '/static/images/categories/lighting.jpg',
+    'Switches & Sockets': '/static/images/categories/switches-sockets.jpg',
+    'Chemicals': '/static/images/categories/chemicals.jpg',
+    'Bathroom Fittings': '/static/images/categories/bathroom-fittings.jpg',
 }
 categories = {}
 for name, image_url in categories_data.items():
     cat, created = Category.objects.get_or_create(name=name)
-    if created or not cat.image:
+    if needs_image_refresh(cat.image, image_url):
         cat.image = image_url
         cat.save()
     categories[name] = cat
@@ -154,7 +184,10 @@ products_data = [
     {'name': 'Epoxy Adhesive 2 Part 50g', 'category': 'Chemicals', 'sku': 'CH-EPO-003', 'mrp': 180, 'selling_price': 155, 'discount_percent': 14, 'gst_percent': 18, 'stock': 40, 'description': 'Two-part epoxy adhesive for strong bonding.'},
 ]
 
+image_refreshed = 0
+
 for p_data in products_data:
+    generated_image = generated_product_image(p_data['sku'])
     product, created = Product.objects.get_or_create(
         sku=p_data['sku'],
         defaults={
@@ -170,17 +203,30 @@ for p_data in products_data:
             'material': p_data.get('material', ''),
             'weight': p_data.get('weight', ''),
             'is_featured': p_data.get('is_featured', False),
-            'images': ['https://images.unsplash.com/photo-1586864387967-d02ef85d93e8?w=400'],
+            'images': [generated_image],
         }
     )
+    if not created and product_needs_image_refresh(product.images, generated_image):
+        product.images = [generated_image]
+        product.save(update_fields=['images'])
+        image_refreshed += 1
 
-print(f"Products created: {Product.objects.count()}")
+print(f"Products created: {Product.objects.count()} (images refreshed: {image_refreshed})")
 
 # Create banners
-Banner.objects.get_or_create(title='Summer Sale - 20% Off Tools', defaults={'image': 'https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?w=800', 'is_active': True, 'order': 1})
-Banner.objects.get_or_create(title='Electrical Essentials', defaults={'image': 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800', 'is_active': True, 'order': 2})
-Banner.objects.get_or_create(title='Bathroom Renovation Deals', defaults={'image': 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=800', 'is_active': True, 'order': 3})
-Banner.objects.get_or_create(title='Plumbing Solutions - Top Brands', defaults={'image': 'https://images.unsplash.com/photo-1585704032915-c3400ca199e7?w=800', 'is_active': True, 'order': 4})
+banners_data = [
+    ('Summer Sale - 20% Off Tools', '/static/images/banners/summer-sale.jpg', 1),
+    ('Electrical Essentials', '/static/images/banners/electrical-essentials.jpg', 2),
+    ('Bathroom Renovation Deals', '/static/images/banners/bathroom-renovation.jpg', 3),
+    ('Plumbing Solutions - Top Brands', '/static/images/banners/plumbing-solutions.jpg', 4),
+]
+for title, image_url, order in banners_data:
+    banner, created = Banner.objects.get_or_create(
+        title=title, defaults={'image': image_url, 'is_active': True, 'order': order}
+    )
+    if not created and needs_image_refresh(banner.image, image_url):
+        banner.image = image_url
+        banner.save(update_fields=['image'])
 
 print("Banners created.")
 
