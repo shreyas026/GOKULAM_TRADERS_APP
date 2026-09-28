@@ -52,30 +52,33 @@ if created:
     admin.set_password('admin123')
     admin.save()
 
-customer1, _ = User.objects.get_or_create(
+customer1, customer1_created = User.objects.get_or_create(
     username='ravi_kumar', defaults={'email': 'ravi@gmail.com', 'phone': '9876543210', 'role': 'customer', 'first_name': 'Ravi', 'last_name': 'Kumar', 'address': '123 Main Street, Bangalore'}
 )
-customer2, _ = User.objects.get_or_create(
+customer2, customer2_created = User.objects.get_or_create(
     username='suresh_babu', defaults={'email': 'suresh@gmail.com', 'phone': '9876543211', 'role': 'customer', 'first_name': 'Suresh', 'last_name': 'Babu', 'address': '456 Lake Road, Bangalore'}
 )
-customer3, _ = User.objects.get_or_create(
+customer3, customer3_created = User.objects.get_or_create(
     username='priya_sharma', defaults={'email': 'priya@gmail.com', 'phone': '9876543212', 'role': 'customer', 'first_name': 'Priya', 'last_name': 'Sharma', 'address': '789 Park Avenue, Bangalore'}
 )
 
-cashier, _ = User.objects.get_or_create(
+cashier, cashier_created = User.objects.get_or_create(
     username='cashier1', defaults={'email': 'cashier@gokulam.com', 'phone': '9876543220', 'role': 'cashier', 'first_name': 'Murugan', 'last_name': 'S'}
 )
-delivery1, _ = User.objects.get_or_create(
+delivery1, delivery1_created = User.objects.get_or_create(
     username='delivery1', defaults={'email': 'delivery1@gokulam.com', 'phone': '9876543230', 'role': 'delivery', 'first_name': 'Karthik', 'last_name': 'R'}
 )
-delivery2, _ = User.objects.get_or_create(
+delivery2, delivery2_created = User.objects.get_or_create(
     username='delivery2', defaults={'email': 'delivery2@gokulam.com', 'phone': '9876543231', 'role': 'delivery', 'first_name': 'Vijay', 'last_name': 'M'}
 )
 
-# Set passwords
-for user in [customer1, customer2, customer3, cashier, delivery1, delivery2]:
-    user.set_password('test123')
-    user.save()
+# Only brand-new accounts get the demo password; never reset existing ones.
+for user, was_created in [(customer1, customer1_created), (customer2, customer2_created),
+                          (customer3, customer3_created), (cashier, cashier_created),
+                          (delivery1, delivery1_created), (delivery2, delivery2_created)]:
+    if was_created:
+        user.set_password('test123')
+        user.save()
 
 print("Users created.")
 

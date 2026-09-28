@@ -2,6 +2,7 @@ from rest_framework import viewsets, permissions, filters, generics, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from decimal import Decimal
 from django.db.models import Q, Count, F
 from django.utils import timezone
 from .models import Category, Brand, Product, Review, Banner, Coupon, StoreConfig
@@ -46,13 +47,13 @@ class ProductViewSet(viewsets.ModelViewSet):
         return ProductListSerializer
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().select_related('category', 'brand')
         if not self.request.user.is_staff:
             qs = qs.filter(is_available=True)
         return qs
 
     def get_permissions(self):
-        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+        if self.action in ['create', 'update', 'partial_update', 'destroy', 'low_stock']:
             return [permissions.IsAdminUser()]
         return [permissions.AllowAny()]
 
@@ -104,7 +105,7 @@ class BannerViewSet(viewsets.ReadOnlyModelViewSet):
 class CouponValidateView(APIView):
     def post(self, request):
         code = request.data.get('code', '')
-        amount = float(request.data.get('amount', 0))
+        amount = Decimal(str(request.data.get('amount', 0) or 0))
         try:
             coupon = Coupon.objects.get(code=code, is_active=True,
                                          valid_from__lte=timezone.now(), valid_to__gte=timezone.now())
@@ -112,7 +113,10 @@ class CouponValidateView(APIView):
                 return Response({'valid': False, 'error': 'Coupon usage limit reached'})
             if amount < coupon.min_order_amount:
                 return Response({'valid': False, 'error': f'Minimum order: {coupon.min_order_amount}'})
-            discount = coupon.discount_amount if coupon.discount_amount > 0 else (amount * coupon.discount_percent / 100)
+            if coupon.discount_amount > 0:
+                discount = coupon.discount_amount
+            else:
+                discount = amount * coupon.discount_percent / 100
             if coupon.max_discount:
                 discount = min(discount, coupon.max_discount)
             return Response({'valid': True, 'discount': float(discount), 'code': code})

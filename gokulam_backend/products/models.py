@@ -46,6 +46,14 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        ordering = ['id']
+        indexes = [
+            models.Index(fields=['selling_price']),
+            models.Index(fields=['is_available', 'is_featured']),
+            models.Index(fields=['stock']),
+        ]
+
     def __str__(self):
         return f"{self.name} ({self.sku})"
 

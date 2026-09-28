@@ -1,3 +1,5 @@
+﻿from decimal import Decimal
+
 from rest_framework import serializers
 from .models import CustomerCredit, CreditTransaction, Payment
 from accounts.serializers import UserSerializer
@@ -86,7 +88,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
 
 class PaymentEntrySerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0.01)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.01'))
     payment_method = serializers.ChoiceField(
         choices=['cash', 'upi', 'bank_transfer', 'card', 'other'],
         default='cash'
@@ -95,7 +97,7 @@ class PaymentEntrySerializer(serializers.Serializer):
 
 
 class AddCreditSerializer(serializers.Serializer):
-    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=0.01)
+    amount = serializers.DecimalField(max_digits=12, decimal_places=2, min_value=Decimal('0.01'))
     note = serializers.CharField(required=False, allow_blank=True)
 
 
