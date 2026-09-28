@@ -57,3 +57,7 @@ gokulam_backend/gokulam_app/
 # Misc
 *.json
 !package.json
+
+# Database backups / local test databases
+gokulam_backend/backups/
+*.sqlite3
