@@ -27,15 +27,18 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'gokulam_backend.server_timing.ServerTimingMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'gokulam_backend.server_timing.ProbeA',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.gzip.GZipMiddleware',
+    'gokulam_backend.server_timing.ProbeB',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'gokulam_backend.server_timing.ProbeC',
 ]
 
 ROOT_URLCONF = 'gokulam_backend.urls'
