@@ -1,30 +1,41 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:gokulam_app/main.dart';
+import 'package:gokulam_app/screens/auth/login_screen.dart';
+import 'package:gokulam_app/screens/auth/register_screen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('login screen renders its form', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: LoginScreen())),
+    );
+    await tester.pump(const Duration(seconds: 1));
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(find.text('Welcome Back'), findsOneWidget);
+    expect(find.text('Sign In'), findsOneWidget);
+    expect(find.byType(TextFormField), findsNWidgets(2));
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
+  testWidgets('register screen blocks a username containing spaces', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const ProviderScope(child: MaterialApp(home: RegisterScreen())),
+    );
+    await tester.pump(const Duration(seconds: 1));
+
+    final submit = find.widgetWithText(ElevatedButton, 'Create Account');
+    expect(submit, findsOneWidget);
+    expect(find.text('Username'), findsOneWidget);
+
+    await tester.ensureVisible(submit);
+    await tester.tap(submit);
     await tester.pump();
+    expect(find.text('Required'), findsWidgets);
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    await tester.enterText(find.byType(TextFormField).first, 'Shreyas S');
+    await tester.ensureVisible(submit);
+    await tester.tap(submit);
+    await tester.pump();
+    expect(find.textContaining('no spaces'), findsOneWidget);
   });
 }

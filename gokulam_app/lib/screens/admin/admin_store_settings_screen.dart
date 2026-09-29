@@ -10,6 +10,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import '../../providers/products_provider.dart';
 import '../../services/api_service.dart';
+import '../../services/error_messages.dart';
 import '../../config/app_config.dart';
 import '../../config/theme.dart';
 import '../../widgets/delivery_map_view.dart';
@@ -76,7 +77,7 @@ class _AdminStoreSettingsScreenState extends ConsumerState<AdminStoreSettingsScr
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e'), backgroundColor: AppTheme.errorColor),
+          SnackBar(content: Text(friendlyAuthError(e)), backgroundColor: AppTheme.errorColor),
         );
       }
     }
@@ -92,6 +93,7 @@ class _AdminStoreSettingsScreenState extends ConsumerState<AdminStoreSettingsScr
         builder: (_) => _AdminMapPicker(
           initialLat: lat,
           initialLng: lng,
+          radiusKm: double.tryParse(_radiusCtrl.text) ?? _current?.deliveryRadiusKm ?? 5,
           onConfirm: (newLat, newLng, address) {
             setState(() {
               _latCtrl.text = newLat.toStringAsFixed(6);
@@ -281,11 +283,13 @@ class _AdminStoreSettingsScreenState extends ConsumerState<AdminStoreSettingsScr
 class _AdminMapPicker extends StatefulWidget {
   final double initialLat;
   final double initialLng;
+  final double radiusKm;
   final void Function(double lat, double lng, String address) onConfirm;
 
   const _AdminMapPicker({
     required this.initialLat,
     required this.initialLng,
+    required this.radiusKm,
     required this.onConfirm,
   });
 
@@ -421,7 +425,7 @@ class _AdminMapPickerState extends State<_AdminMapPicker> {
               ),
               CircleLayer(
                 circles: [
-                  for (var km = 1; km <= 5; km++)
+                  for (var km = 1; km <= widget.radiusKm.ceil().clamp(1, 20); km++)
                     CircleMarker(
                       point: _pickedLocation,
                       radius: km * 1000.0,

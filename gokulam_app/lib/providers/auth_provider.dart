@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/auth_service.dart';
+import '../services/error_messages.dart';
 import '../models/user_model.dart';
 
 class AuthState {
@@ -44,7 +45,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       final result = await _authService.login(username, password);
       state = AuthState(user: result['user'], isLoggedIn: true);
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: 'Login failed: ${_friendlyError(e)}');
+      state = state.copyWith(isLoading: false, error: 'Login failed: ${friendlyAuthError(e)}');
     }
   }
 
@@ -59,22 +60,8 @@ class AuthNotifier extends StateNotifier<AuthState> {
         state = AuthState(user: result.user, isLoggedIn: true);
       }
     } catch (e) {
-      state = state.copyWith(isLoading: false, error: _friendlyError(e));
+      state = state.copyWith(isLoading: false, error: friendlyAuthError(e));
     }
-  }
-
-  String _friendlyError(Object e) {
-    final msg = e.toString();
-    if (msg.contains('4100') || msg.toLowerCase().contains('phones made')) {
-      return 'This phone number is already registered.';
-    }
-    if (msg.contains('username') && msg.toLowerCase().contains('exists')) {
-      return 'This username is already taken.';
-    }
-    if (msg.contains('401') || msg.contains('No active account') || msg.contains('Invalid credentials')) {
-      return 'Invalid username or password.';
-    }
-    return 'Something went wrong. Please try again.';
   }
 
   Future<void> logout() async {

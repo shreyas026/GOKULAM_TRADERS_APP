@@ -62,20 +62,47 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               children: [
                 TextFormField(
                   controller: _nameController,
-                  decoration: const InputDecoration(labelText: 'Full Name', prefixIcon: Icon(Icons.person)),
-                  validator: (v) => v == null || v.trim().isEmpty ? 'Required' : null,
+                  decoration: const InputDecoration(
+                    labelText: 'Username',
+                    prefixIcon: Icon(Icons.person),
+                    helperText: 'Used to sign in. Letters, numbers and @ . _ + - only',
+                  ),
+                  validator: (v) {
+                    final value = v == null ? '' : v.trim();
+                    if (value.isEmpty) return 'Required';
+                    if (!RegExp(r'^[A-Za-z0-9@._+\-]+$').hasMatch(value)) {
+                      return 'Letters, numbers and @ . _ + - only (no spaces)';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
                   decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email)),
                   keyboardType: TextInputType.emailAddress,
+                  validator: (v) {
+                    final value = v == null ? '' : v.trim();
+                    if (value.isEmpty) return null;
+                    if (!RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(value)) {
+                      return 'Enter a valid email address';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
                   decoration: const InputDecoration(labelText: 'Phone', prefixIcon: Icon(Icons.phone)),
                   keyboardType: TextInputType.phone,
+                  validator: (v) {
+                    final value = v == null ? '' : v.trim();
+                    if (value.isEmpty) return null;
+                    if (!RegExp(r'^[0-9]{10,15}$').hasMatch(value)) {
+                      return 'Enter a valid 10 digit phone number';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 16),
                 TextFormField(

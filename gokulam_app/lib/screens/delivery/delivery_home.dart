@@ -6,6 +6,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:go_router/go_router.dart';
 import 'package:latlong2/latlong.dart';
 import '../../providers/orders_provider.dart';
+import '../../providers/products_provider.dart';
 import '../../config/theme.dart';
 import '../../config/app_config.dart';
 import '../../widgets/delivery_map_view.dart';
@@ -85,6 +86,10 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
   @override
   Widget build(BuildContext context) {
     final ordersAsync = ref.watch(ordersProvider);
+    final storeConfig = ref.watch(storeConfigProvider).valueOrNull;
+    final shopPoint = storeConfig != null
+        ? LatLng(storeConfig.latitude, storeConfig.longitude)
+        : const LatLng(AppConfig.storeLat, AppConfig.storeLng);
 
     return Scaffold(
       appBar: AppBar(title: const Text('My Deliveries')),
@@ -163,7 +168,7 @@ class _DeliveryHomeScreenState extends ConsumerState<DeliveryHomeScreen> {
                           child: DeliveryRadiusMap(
                             center: _currentPosition != null
                                 ? LatLng(_currentPosition!.latitude, _currentPosition!.longitude)
-                                : LatLng(AppConfig.storeLat, AppConfig.storeLng),
+                                : shopPoint,
                             marker: LatLng(order.deliveryLat!, order.deliveryLng!),
                             initialZoom: 13,
                             showTierCircles: false,

@@ -1,5 +1,7 @@
+from decimal import Decimal
+
 from rest_framework import serializers
-from .models import Category, Brand, Product, Review, Banner, Coupon
+from .models import Category, Brand, Product, Review, Banner, Coupon, StoreConfig
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -72,3 +74,19 @@ class CouponSerializer(serializers.ModelSerializer):
     class Meta:
         model = Coupon
         fields = '__all__'
+
+
+class StoreConfigSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(max_length=200, allow_blank=True)
+    address = serializers.CharField(max_length=500, allow_blank=True)
+    latitude = serializers.FloatField(min_value=-90, max_value=90)
+    longitude = serializers.FloatField(min_value=-180, max_value=180)
+    delivery_radius_km = serializers.FloatField(min_value=0.1, max_value=100)
+    delivery_charge_per_half_km = serializers.DecimalField(
+        max_digits=6, decimal_places=2, min_value=Decimal('0'), max_value=Decimal('9999.99'),
+        coerce_to_string=False,
+    )
+
+    class Meta:
+        model = StoreConfig
+        fields = ['name', 'address', 'latitude', 'longitude', 'delivery_radius_km', 'delivery_charge_per_half_km']

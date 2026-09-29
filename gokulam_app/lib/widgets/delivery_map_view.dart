@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:latlong2/latlong.dart';
 import '../config/theme.dart';
 import '../config/app_config.dart';
+import '../providers/products_provider.dart';
 
 const storeLatLng = LatLng(AppConfig.storeLat, AppConfig.storeLng);
 
@@ -21,13 +23,13 @@ Color tierColorForDistance(double distanceKm) {
   return tierColorForKm(km);
 }
 
-class DeliveryRadiusMap extends StatelessWidget {
+class DeliveryRadiusMap extends ConsumerWidget {
   final LatLng center;
   final LatLng? marker;
   final bool showTierCircles;
   final double initialZoom;
-  final LatLng storeCenter;
-  final double radiusKm;
+  final LatLng? storeCenter;
+  final double? radiusKm;
 
   const DeliveryRadiusMap({
     super.key,
@@ -35,17 +37,22 @@ class DeliveryRadiusMap extends StatelessWidget {
     this.marker,
     this.showTierCircles = true,
     this.initialZoom = 13,
-    this.storeCenter = storeLatLng,
-    this.radiusKm = 5,
+    this.storeCenter,
+    this.radiusKm,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final store = ref.watch(storeConfigProvider).valueOrNull;
+    final LatLng shop = storeCenter ??
+        (store != null ? LatLng(store.latitude, store.longitude) : storeLatLng);
+    final double radius = radiusKm ?? store?.deliveryRadiusKm ?? 5;
+
     final circles = <CircleMarker>[];
     if (showTierCircles) {
-      for (var km = 1; km <= radiusKm.ceil(); km++) {
+      for (var km = 1; km <= radius.ceil(); km++) {
         circles.add(CircleMarker(
-          point: storeCenter,
+          point: shop,
           radius: km * 1000.0,
           useRadiusInMeter: true,
           color: tierColorForKm(km).withOpacity(0.08),
@@ -57,7 +64,7 @@ class DeliveryRadiusMap extends StatelessWidget {
 
     final markers = <Marker>[
       Marker(
-        point: storeCenter,
+        point: shop,
         width: 44,
         height: 44,
         child: Column(

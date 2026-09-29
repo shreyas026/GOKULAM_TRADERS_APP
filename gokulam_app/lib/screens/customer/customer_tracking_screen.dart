@@ -152,8 +152,12 @@ class _CustomerTrackingScreenState extends ConsumerState<CustomerTrackingScreen>
     final agent = _agentLocation;
     final hasAgent = agent != null;
     final order = _order;
+    final storeConfig = ref.watch(storeConfigProvider).valueOrNull;
+    final shopPoint = storeConfig != null
+        ? LatLng(storeConfig.latitude, storeConfig.longitude)
+        : const LatLng(AppConfig.storeLat, AppConfig.storeLng);
 
-    LatLng center = dest ?? const LatLng(AppConfig.storeLat, AppConfig.storeLng);
+    LatLng center = dest ?? shopPoint;
     if (hasAgent) center = agent!;
 
     return Scaffold(
@@ -367,7 +371,7 @@ class _CustomerTrackingScreenState extends ConsumerState<CustomerTrackingScreen>
                       onPressed: dest == null
                           ? null
                           : () async {
-                              final origin = agent ?? LatLng(AppConfig.storeLat, AppConfig.storeLng);
+                              final origin = agent ?? shopPoint;
                               final url = 'https://www.google.com/maps/dir/?api=1&origin=${origin.latitude},${origin.longitude}&destination=${dest.latitude},${dest.longitude}&travelmode=driving';
                               await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
                             },
